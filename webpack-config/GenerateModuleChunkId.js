@@ -1,7 +1,7 @@
 "use strict";
 
-const path = require('path');
-const utils = require('./utils');
+// const path = require('path');
+// const utils = require('./utils');
 
 
 class GenerateModuleChunkId {
@@ -17,7 +17,7 @@ class GenerateModuleChunkId {
 
   _processModules(modules, context) {
     for (const module of modules) {
-      utils.addWriteFileSync(path.resolve(__dirname, 'modulesInfo.json'), utils.getKeysAndVal(module) + '\n\n')
+      // utils.addWriteFileSync(path.resolve(__dirname, 'modulesInfo.json'), utils.getKeysAndVal(module) + '\n\n')
 
       // 已经生成id, 通过插件自定义修改id
       const moduleId = module.id || (module.libIdent ? module.libIdent({context}) : null)

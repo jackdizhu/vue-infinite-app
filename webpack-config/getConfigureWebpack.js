@@ -32,6 +32,7 @@ module.exports = function getConfigureWebpack(mainFile, name) {
         resourcesVar: `window.resourcesConst_${name}`,
         resourcesRequireVar: `window.webpackRequire_${name}`,
         resourcesMainFileName: `main_${name}.js`,
+        resourcesMainModuleid: `/src/${mainFile}`,
       }),
     ],
   };

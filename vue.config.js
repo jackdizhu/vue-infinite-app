@@ -2,8 +2,8 @@
 const configureWebpack = require('./webpack-config/configureWebpack');
 const getConfigureWebpack = require('./webpack-config/getConfigureWebpack');
 
-const isSubMod = true; // 是否子应用打包
-const subAppName = 'appUser'; // 子应用名称
+const isSubMod = false; // 是否子应用打包
+const subAppName = ''; // 子应用名称
 
 const subAppListConf = {
   appConf: {

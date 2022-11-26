@@ -1,6 +1,6 @@
 export default {};
 
-export const getAppResourcesConf = function getAppResourcesConf(name) {
+export const getAppResourcesConf = function getAppResourcesConf(name, mainFile) {
   return {
     publicPath: `/${name}/`,
     resourcesFileName: `resources_${name}.js`,
@@ -8,14 +8,15 @@ export const getAppResourcesConf = function getAppResourcesConf(name) {
     resourcesRequireVar: `window.webpackRequire_${name}`,
     resourceswebpackJsonpVar: `window.webpackJsonp_${name}`,
     resourcesMainFileName: `main_${name}.js`,
+    resourcesMainModuleid: `/src/${mainFile}`,
   };
 };
 /**
  * 所有子应用配置
  */
 export const appList = {
-  appConf: getAppResourcesConf('appConf'),
-  appUser: getAppResourcesConf('appUser'),
+  appConf: getAppResourcesConf('appConf', 'main-app-conf.js'),
+  appUser: getAppResourcesConf('appUser', 'main-app-user.js'),
 };
 
 const loadScriptCache = {}; // 记录已经加载的script
@@ -88,7 +89,6 @@ export const loadSubAppByName = function loadSubAppByName(name) {
     loadScript($url).then(() => {
       const $var = conf.resourcesVar.replace('window.', '');
       const $resourcesRequireVar = conf.resourcesRequireVar.replace('window.', '');
-      const $deferredModulesVar = conf.deferredModulesVar.replace('window.', '');
       const $res = window[$var] || '';
       console.log('$resources --', $res);
 
@@ -104,11 +104,9 @@ export const loadSubAppByName = function loadSubAppByName(name) {
       });
       loadSubApp($urlList).then(() => {
         const $require = window[$resourcesRequireVar];
-        const $defModules = window[$deferredModulesVar];
 
-        const mainModuleid = ``
-        debugger
-        const $module = $require($defModules[0]);
+        const mainModuleid = conf.resourcesMainModuleid;
+        const $module = $require(mainModuleid);
         const res = $module && $module.default;
         if (!res) {
           reject(new Error(`${name} 加载应用文件失败`));

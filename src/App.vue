@@ -13,17 +13,29 @@
 <script>
 import {loadSubAppByName} from './config/index'
 
-
 export default {
+  data () {
+    return {
+      loadSubAppCache: {} // 记录已经注册的应用
+    }
+  },
   methods: {
     /**
      * 加载子应用
      */
     loadSubApp (name, defRoute) {
+      if (this.loadSubAppCache[name]) {
+        if (defRoute) {
+          this.$router.push(defRoute)
+        }
+        return false
+      }
       loadSubAppByName(name).then(res => {
         const routerPromise = res.default
         routerPromise.then((list) => {
           let $list = (list && list.default) || list
+          this.loadSubAppCache[name] = $list // 记录缓存
+          console.log('this.$router --', this.$router)
           console.log('$list --', $list)
           this.$router.addRoutes($list)
           if (defRoute) {
