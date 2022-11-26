@@ -1,0 +1,32 @@
+// vue.config.js
+const configureWebpack = require('./webpack-config/configureWebpack');
+const getConfigureWebpack = require('./webpack-config/getConfigureWebpack');
+
+const isSubMod = true; // 是否子应用打包
+const subAppName = 'appUser'; // 子应用名称
+
+const subAppListConf = {
+  appConf: {
+    mainjs: 'main-app-conf.js',
+    name: 'appConf',
+    publicPath: '/appConf/',
+  },
+  appUser: {
+    mainjs: 'main-app-user.js',
+    name: 'appUser',
+    publicPath: '/appUser/',
+  },
+};
+const subConf = subAppListConf[subAppName]; // 子应用打包配置
+
+const subMod = isSubMod && subConf;
+const $configureWebpack = subMod ? getConfigureWebpack(subConf.mainjs, subConf.name) : configureWebpack;
+const $publicPath = subMod ? subConf.publicPath : '/';
+/**
+ * @type {import('@vue/cli-service').ProjectOptions}
+ */
+module.exports = {
+  publicPath: $publicPath,
+  productionSourceMap: false,
+  configureWebpack: $configureWebpack,
+};
