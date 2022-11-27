@@ -1,12 +1,75 @@
 export default {};
 
+/**
+ * 应用注册管理
+ * @param {String} key window对象属性
+ */
+export const appRegisterManage = function appRegisterManage(key = '__appRegisterManage__') {
+  const $val = {};
+  const handler = {
+    /**
+      * target 目标对象
+      * propKey 对象属性名
+      * proxy 实例本身（严格地说，是操作行为所针对的对象)
+      */
+    get: function $valGet(target, property, receiver) {
+      // console.log('Proxy.get', target, property, receiver);
+      let key1 = '';
+      const $prop = property.replace(/^([a-zA-Z_-]+)\./, (match, p1, offset, string) => {
+        key1 = p1;
+        return '';
+      });
+      if (key1) {
+        return target[key1] && target[key1][$prop];
+      }
+
+      return target[$prop];
+    },
+    /**
+      * target 目标对象
+      * key 属性名
+      * value 属性值
+      * receive 代理本身
+      */
+    set: function $valSet(target, property, value, receiver) {
+      // console.log('Proxy.set', target, property, value, receiver);
+      let key1 = '';
+      const $prop = property.replace(/^([a-zA-Z_-]+)\./, (match, p1, offset, string) => {
+        key1 = p1;
+        return '';
+      });
+      if (key1) {
+        if (!target[key1]) { target[key1] = {}; }
+        target[key1][$prop] = value;
+        return target[key1][$prop];
+      }
+      target[property] = value;
+      return target[property];
+    },
+    /**
+      * target 目标对象
+      * propKey 属性名
+      */
+    deleteProperty: function $valDeleteProperty(target, propKey) {
+      // console.log(target, propKey);
+      return true;
+    },
+  };
+  const $proxyVal = new Proxy($val, handler);
+  Object.defineProperty(window, key, {
+    writable: false,
+    value: $proxyVal,
+  });
+  return key;
+};
+
 export const getAppResourcesConf = function getAppResourcesConf(name, mainFile) {
   return {
     publicPath: `/${name}/`,
     resourcesFileName: `resources_${name}.js`,
-    resourcesVar: `window.resourcesConst_${name}`,
-    resourcesRequireVar: `window.webpackRequire_${name}`,
-    resourceswebpackJsonpVar: `window.webpackJsonp_${name}`,
+    resourcesVar: `window.__appRegisterManage__.${name}.resourcesConst`,
+    resourcesRequireVar: `window.__appRegisterManage__.${name}.webpackRequire`,
+    resourceswebpackJsonpVar: `window.__appRegisterManage__.${name}.webpackJsonp`,
     resourcesMainFileName: `main_${name}.js`,
     resourcesMainModuleid: `/src/${mainFile}`,
   };
@@ -83,13 +146,14 @@ export const loadSubAppByName = function loadSubAppByName(name) {
     if (!conf) {
       return reject(new Error(`${name} 应用不存在`));
     }
+    const $root = window.__appRegisterManage__ || window; // 全局对象
     const $origin = conf.origin || window.origin;
     const $url = $origin + conf.publicPath + conf.resourcesFileName;
     console.log('conf --', conf);
     loadScript($url).then(() => {
-      const $var = conf.resourcesVar.replace('window.', '');
-      const $resourcesRequireVar = conf.resourcesRequireVar.replace('window.', '');
-      const $res = window[$var] || '';
+      const $var = conf.resourcesVar.replace('window.__appRegisterManage__.', '');
+      const $resourcesRequireVar = conf.resourcesRequireVar.replace('window.__appRegisterManage__.', '');
+      const $res = $root[$var] || '';
       console.log('$resources --', $res);
 
       const $resList = $res.split(',');
@@ -103,7 +167,7 @@ export const loadSubAppByName = function loadSubAppByName(name) {
         $urlList.push($url);
       });
       loadSubApp($urlList).then(() => {
-        const $require = window[$resourcesRequireVar];
+        const $require = $root[$resourcesRequireVar];
 
         const mainModuleid = conf.resourcesMainModuleid;
         const $module = $require(mainModuleid);

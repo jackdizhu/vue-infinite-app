@@ -17,7 +17,7 @@ module.exports = function getConfigureWebpack(mainFile, name) {
     },
     output: {
       filename: `main_${name}.js`,
-      jsonpFunction: `webpackJsonp_${name}`,
+      jsonpFunction: `__appRegisterManage__.${name}.webpackJsonp`,
       path: path.resolve(__dirname, '../', 'dist'),
     },
     optimization: {
@@ -29,8 +29,8 @@ module.exports = function getConfigureWebpack(mainFile, name) {
       }),
       new SubAppBuildPlugin({
         resourcesFileName: `resources_${name}.js`,
-        resourcesVar: `window.resourcesConst_${name}`,
-        resourcesRequireVar: `window.webpackRequire_${name}`,
+        resourcesVar: `window.__appRegisterManage__["${name}.resourcesConst"]`, // 通过name.resourcesConst方式初始化应用
+        resourcesRequireVar: `window.__appRegisterManage__["${name}.webpackRequire"]`,
         resourcesMainFileName: `main_${name}.js`,
         resourcesMainModuleid: `/src/${mainFile}`,
       }),
