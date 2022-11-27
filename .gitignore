@@ -12,7 +12,7 @@ yarn-debug.log*
 yarn-error.log*
 
 package-lock.json
-public/app*/*
+# public/app*/*
 modulesInfo.json
 
 # Editor directories and files
