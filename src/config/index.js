@@ -123,8 +123,11 @@ export const loadScript = function loadScript(src) {
 export const loadSubApp = function loadSubApp(list = []) {
   return new Promise((reslove, reject) => {
     const $promiseList = [];
-    list.forEach((src) => {
-      $promiseList.push(loadScript(src));
+    list.forEach((item) => {
+      // 仅加载必要文件
+      if (item.type === 'entry' && item.url) {
+        $promiseList.push(loadScript(item.url));
+      }
     });
     return Promise.all($promiseList)
       .then(() => {
@@ -153,18 +156,18 @@ export const loadSubAppByName = function loadSubAppByName(name) {
     loadScript($url).then(() => {
       const $var = conf.resourcesVar.replace('window.__appRegisterManage__.', '');
       const $resourcesRequireVar = conf.resourcesRequireVar.replace('window.__appRegisterManage__.', '');
-      const $res = $root[$var] || '';
-      console.log('$resources --', $res);
+      const $resList = $root[$var] || [];
+      console.log('$resources --', $resList);
 
-      const $resList = $res.split(',');
-      if (!$res || !$resList[0] === '') {
+      if (!Array.isArray($resList) || !$resList.length) {
         return reject(new Error(`${name} 加载资源列表失败`));
       }
 
-      const $urlList = [];
-      $resList.forEach((fileName) => {
-        const $url = $origin + conf.publicPath + fileName;
-        $urlList.push($url);
+      const $urlList = $resList.map((item) => {
+        return {
+          ...item,
+          url: $origin + conf.publicPath + item.value,
+        }
       });
       loadSubApp($urlList).then(() => {
         const $require = $root[$resourcesRequireVar];

@@ -5,15 +5,21 @@ const fs = require('fs');
  * @param {Object} moduleObj 要查看的对象
  */
 const getKeysAndVal = function getKeysAndVal(moduleObj = {}, index = 0, parentKey = '') {
-  return Object.keys(moduleObj).map((key) => {
-    let val = moduleObj[key]
-    let keyStr = parentKey ? `${parentKey}.${key}` : key
-    let typeStr = Object.prototype.toString.call(val);
-    if (typeof val === 'string' || typeof val === 'number') {
+  const objTypeStr = Object.prototype.toString.call(moduleObj);
+  const keys = (objTypeStr === '[object Sets]' || objTypeStr === '[object Map]') ? Array.from(moduleObj.keys()) : Object.keys(moduleObj);
+  return keys.map((key) => {
+    let val = moduleObj[key];
+    const keyStr = parentKey ? `${parentKey}.${key}` : key;
+    const typeStr = Object.prototype.toString.call(val);
+    if (typeof val === 'string' || typeof val === 'number' || typeof val === 'boolean') {
       return `{key: "${keyStr}", "value: ${val}}",`;
-    } else if (typeStr === '[object Object]' && index < 1) {
+    } else if ((typeStr === '[object Sets]' || typeStr === '[object Map]' || typeStr === '[object Array]' || typeStr === '[object Object]') && index < 2) {
       return `{key: "${keyStr}", type: "${typeStr}", child: ${getKeysAndVal(val, index + 1, keyStr)}},`;
     }
+    // else if (typeof val === 'function') {
+    //   val = val();
+    //   return `{key: "${keyStr}", type: "${typeStr}", child Fn-val: ${val}},`;
+    // }
     return `{key: "${keyStr}", type: "${typeStr}}",`;
   }).join('\n');
 };
