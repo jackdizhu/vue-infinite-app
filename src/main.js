@@ -3,8 +3,9 @@ import App from './App.vue';
 import router from './router';
 import { appRegisterManage } from './config/index';
 
+// eslint-disable-next-line
 const $prop = appRegisterManage(); // 初始化全局对象
-console.log($prop);
+// console.log($prop);
 
 Vue.config.productionTip = false;
 
