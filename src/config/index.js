@@ -8,6 +8,14 @@ export const appRegisterManage = function appRegisterManage(key = '__appRegister
   const $val = {};
   const handler = {
     /**
+     * target 目标对象
+     * propKey 对象属性名
+     */
+    deleteProperty: function $valDelete(target, property) {
+      // Reflect.deleteProperty(...arguments);
+      return false; // 禁止删除
+    },
+    /**
       * target 目标对象
       * propKey 对象属性名
       * proxy 实例本身（严格地说，是操作行为所针对的对象)
@@ -20,10 +28,12 @@ export const appRegisterManage = function appRegisterManage(key = '__appRegister
         return '';
       });
       if (key1) {
-        return target[key1] && target[key1][$prop];
+        const $target = Reflect.get(target, key1, receiver);
+        return $target && Reflect.get($target, $prop, $target);
       }
-
-      return target[$prop];
+      
+      // target[$prop];
+      return Reflect.get(target, $prop, receiver); // 内置的对象;
     },
     /**
       * target 目标对象
@@ -39,12 +49,19 @@ export const appRegisterManage = function appRegisterManage(key = '__appRegister
         return '';
       });
       if (key1) {
-        if (!target[key1]) { target[key1] = {}; }
-        target[key1][$prop] = value;
-        return target[key1][$prop];
+        let $target = {}
+        if (!target[key1]) {
+          Reflect.set(target, key1, $target, receiver);
+        } else {
+          $target = Reflect.get(target, key1, receiver);
+        }
+        return Reflect.set($target, $prop, value, $target);
       }
-      target[property] = value;
-      return target[property];
+      // target[property] = value;
+      if (Reflect.has(target, property)) { // 禁止覆盖
+        return Reflect.get(target, property, receiver);
+      }
+      return Reflect.set(target, property, value, receiver); // 内置的对象;
     },
     /**
       * target 目标对象
